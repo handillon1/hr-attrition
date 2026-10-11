@@ -2,6 +2,15 @@
 
 An end-to-end machine-learning project that predicts which employees are most likely to leave a company and uses statistical testing to evaluate the projected impact of HR retention programs.
 
+## TL;DR
+
+- **Model:** Logistic Regression was the best of 5 classifiers (ROC-AUC 0.81). Tuning the decision threshold from 0.50 to 0.42 raised the share of leavers caught from **60% to 74%**.
+- **Risk tiers:** employees scored High risk left at **49.1%**, versus **3.0%** in the Low tier (14.4% Medium).
+- **Overtime:** employees working overtime left at **30.5% vs 10.4%** (about 3x), and the gap holds at almost every tenure.
+- **Interventions:** simulated retention programs on the 342 high-risk employees cut predicted attrition by **21–28%**, with pilot sizes of 127–262 employees to confirm each one.
+
+![Attrition by tenure, with and without overtime](figures/attrition_by_tenure_overtime.png)
+
 ## Overview
 
 Employee attrition is a costly problem: replacing a single employee can cost 50–200% of their annual salary in recruiting, onboarding, and lost productivity. This project takes IBM's published HR Analytics dataset and builds a complete pipeline — from data cleaning through modeling, explainability, and counterfactual A/B simulation — to answer two questions:
@@ -80,12 +89,22 @@ This is the part that turns a model into a decision tool. For each hypothetical 
 
 The output is a ranked list of programs with effect size, p-value, and required sample size — i.e., what to actually pilot first.
 
+![Simulated retention programs on the high-risk cohort](figures/intervention_simulations.png)
+
+| Program | Simulated attrition (control → treatment) | Relative reduction | Pilot size needed (80% power) |
+|---|:--:|:--:|:--:|
+| Retention bonus | 77.8% → 56.0% | 28.0% | 143 |
+| Flexible / hybrid schedule | 82.0% → 59.8% | 27.1% | 127 |
+| Reduced overtime | 76.0% → 60.0% | 21.1% | 262 |
+
+These are model-based simulations, not observed outcomes. The flexible-schedule and overtime programs change real features and re-score employees through the model; the retention bonus has no matching feature in the data, so its effect is an assumed 28% risk reduction. The table is a guide to which pilot to run first, not proof that a program works.
+
 ## Key Findings
 
-- **Overtime is the single strongest driver.** Employees working overtime have roughly 3× the attrition rate of those who don't, and the feature dominates both SHAP and permutation-importance rankings.
-- **Tenure is non-linear.** Attrition spikes in the 0–2 year bucket, drops sharply, then climbs slightly again past 10 years — the classic "honeymoon" pattern.
-- **Compensation matters less than satisfaction at the margin.** Once role and overtime are controlled for, monthly income's marginal effect is smaller than `JobSatisfaction` and `EnvironmentSatisfaction`.
-- **The high-risk tier is small but actionable.** The High tier captures roughly the top decile of employees and concentrates a disproportionate share of true attrition cases — the right population for targeted intervention.
+- **Overtime is one of the strongest drivers.** Employees working overtime leave at 30.5% vs 10.4% for those who don't (about 3x), and overtime ranks second in permutation importance.
+- **Tenure is non-linear.** Attrition is highest in the first two years, especially for employees working overtime (over 70% in year 0), then falls sharply.
+- **Involvement, travel, and promotion gaps matter.** Job involvement, frequent business travel, work-life balance, and years since last promotion are among the top drivers in the model's coefficients and SHAP values.
+- **The high-risk tier is where to act.** 342 employees (23% of the workforce) fall in the High tier, and 49.1% of them actually left — the right population for targeted retention programs.
 
 ## Tech Stack
 
